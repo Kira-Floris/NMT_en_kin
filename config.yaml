@@ -88,7 +88,7 @@ training:
     model_dir: "models/en_to_kin_transformer"
     overwrite: False
     shuffle: True
-    use_cuda: False
+    use_cuda: True
     fp16: True
     print_valid_sents: [0, 1, 2]
     keep_best_ckpts: 3
