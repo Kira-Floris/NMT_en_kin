@@ -1,0 +1,1 @@
+python -m joeynmt train config.yaml
