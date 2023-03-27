@@ -42,92 +42,68 @@ data:
             pretokenizer: "none"
 
 testing:
-    n_best: 1
     beam_size: 5
-    beam_alpha: 1.0
-    batch_size: 10
-    batch_type: "sentence"
-    eval_metrics: ["bleu"]
-    max_output_length: 31
-    min_output_length: 1
-    return_prob: "none"
-    return_attention: False
-    generate_unk: False
-    no_repeat_ngram_size: -1
-    repetition_penalty: -1
-    sacrebleu_cfg:                      # sacrebleu options
-        whitespace: False     # `remove_whitespace` option in sacrebleu.corpus_chrf() function (defalut: True)
-        tokenize: "13a"            # `tokenize` option in sacrebleu.corpus_bleu() function (options include: "none" (use for already tokenized test data), "13a" (default minimal tokenizer), "intl" which mostly does punctuation and unicode, etc) 
+    alpha: 1.0
 
 training:
-    reset_best_ckpt: False
-    reset_scheduler: False
-    reset_optimizer: False
-    reset_iter_state: False
     random_seed: 42
     optimizer: "adam"
+    normalization: "tokens"
     adam_betas: [0.9, 0.999]
-    learning_rate: 0.005
-    learning_rate_min: 0.0001
-    clip_grad_val: 1.0
-    weight_decay: 0.
-    loss: "crossentropy"
-    label_smoothing: 0.0
-    batch_size: 10
-    batch_type: "sentence"
-    batch_multiplier: 1
-    normalization: "batch"
     scheduling: "plateau"
     patience: 5
-    decrease_factor: 0.5
-    epochs: 1
-    updates: 100
-    validation_freq: 10
-    logging_freq: 10
-    early_stopping_metric: "loss"
+    learning_rate_factor: 0.5
+    learning_rate_warmup: 1000
+    decrease_factor: 0.7
+    loss: "crossentropy"
+    learning_rate: 0.0003
+    learning_rate_min: 0.00000001
+    weight_decay: 0.0
+    label_smoothing: 0.1
+    batch_size: 4096
+    batch_type: "token"
+    eval_batch_size: 3600
+    eval_batch_type: "token"
+    batch_multiplier: 1
+    early_stopping_metric: "ppl"
+    epochs: 5
+    validation_freq: 1000
+    eval_metric: "bleu"
     model_dir: "models/en_to_kin_transformer"
-    overwrite: False
+    overwrite: True
     shuffle: True
     use_cuda: True
-    fp16: True
-    print_valid_sents: [0, 1, 2]
-    keep_best_ckpts: 3
+    max_output_length: 100
+    print_valid_sents: [0, 1, 2, 3]
+    keep_last_ckpts: 3
 
 model:
-    initializer: "xavier_uniform"
-    init_gain: 1.0
+    initializer: "xavier"
     bias_initializer: "zeros"
-    embed_initializer: "xavier_uniform"
+    init_gain: 1.0
+    embed_initializer: "xavier"
     embed_init_gain: 1.0
-    tied_embeddings: False       # Requires joint vocabulary.
+    tied_embeddings: False
     tied_softmax: True
     encoder:
         type: "transformer"
         num_layers: 6
-        num_heads: 4             # Increase to 8 for larger data.
+        num_heads: 4             
         embeddings:
-            embedding_dim: 256   # Increase to 512 for larger data.
+            embedding_dim: 256   
             scale: True
-            freeze: False
             dropout: 0.2
-        # typically ff_size = 4 x hidden_size
-        hidden_size: 256         # Increase to 512 for larger data.
-        ff_size: 1024            # Increase to 2048 for larger data.
+        hidden_size: 256         
+        ff_size: 1024            
         dropout: 0.3
-        freeze: False
-        layer_norm: "pre"
     decoder:
         type: "transformer"
         num_layers: 6
-        num_heads: 4              # Increase to 8 for larger data.
+        num_heads: 4             
         embeddings:
-            embedding_dim: 256    # Increase to 512 for larger data.
+            embedding_dim: 256   
             scale: True
-            freeze: False
             dropout: 0.2
-        # typically ff_size = 4 x hidden_size
-        hidden_size: 256         # TODO: Increase to 512 for larger data.
-        ff_size: 1024            # TODO: Increase to 2048 for larger data.
+        hidden_size: 256         
+        ff_size: 1024            
         dropout: 0.3
-        freeze: False
-        layer_norm: "pre"
