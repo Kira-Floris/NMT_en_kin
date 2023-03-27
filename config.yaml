@@ -73,6 +73,7 @@ training:
     overwrite: True
     shuffle: True
     use_cuda: True
+    fp16: True
     max_output_length: 100
     print_valid_sents: [0, 1, 2, 3]
     keep_last_ckpts: 3
