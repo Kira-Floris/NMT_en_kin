@@ -72,7 +72,7 @@ training:
     model_dir: "models/en_to_kin_transformer"
     overwrite: True
     shuffle: True
-    use_cuda: False
+    use_cuda: True
     fp16: True
     max_output_length: 100
     print_valid_sents: [0, 1, 2, 3]
