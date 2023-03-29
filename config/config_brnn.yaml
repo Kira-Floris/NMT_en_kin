@@ -27,7 +27,7 @@ src_seq_length: 150
 # tgt_subword_model: target.model
 
 # Where to save the log file and the output models/checkpoints
-log_file: NMT_en_kin/data/logs/onmt/en_kin_model_brnn.log
+# log_file: NMT_en_kin/data/logs/onmt/en_kin_model_brnn.log
 save_model: NMT_en_kin/models/onmt/en_kin_model_brnn/en_kin_model
 
 # Stop training if it does not imporve after n validations
