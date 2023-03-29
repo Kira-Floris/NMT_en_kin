@@ -1,3 +1,6 @@
+save_data: run
+
+# training data
 data:
     corpus_1:
         path_src: NMT_en_kin/data/train/train-en.txt

@@ -1,3 +1,5 @@
+save_data: run
+
 # Training files
 data:
     corpus_1:
