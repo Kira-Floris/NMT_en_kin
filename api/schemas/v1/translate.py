@@ -7,4 +7,4 @@ class TranslateTextRequestSchema(BaseModel):
     text: str
     
 class TranslateTextResponseSchema(BaseModel):
-    translation: List[str]
+    translation: str
