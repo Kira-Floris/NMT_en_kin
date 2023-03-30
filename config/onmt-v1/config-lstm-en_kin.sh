@@ -8,4 +8,4 @@ onmt_train --data NMT_en_kin/data/vocab/onmt-v1/en_kin --save_model NMT_en_kin/m
 onmt_translate --model NMT_en_kin/models/onmt_v1/en_kin_model_step_20000.pt --src NMT_en_kin/data/test/test.en --output NMT_en_kin/temp/pred_kin.txt --replace_unk --verbose
 
 # calculating score
-sacrebleu NMT_en_kin/data/test/test.kin NMT_en_kin/temp/pred_kin.txt
+sacrebleu NMT_en_kin/data/test/test.kin < NMT_en_kin/temp/pred_kin.txt
