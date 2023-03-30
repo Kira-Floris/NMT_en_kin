@@ -1,2 +1,4 @@
 sacrebleu
-OpenNMT-py
+OpenNMT-py==1.2.0
+fastapi
+uvicorn
