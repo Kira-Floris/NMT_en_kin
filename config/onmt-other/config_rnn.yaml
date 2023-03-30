@@ -24,8 +24,7 @@ valid_steps: 1000
 world_size: 1
 gpu_ranks: [0]
 
-encoder_type: rnn
-decoder_type: rnn
+encoder_type: brnn
 word_vec_size: 128
 hidden_size: 512
 layers: 1
