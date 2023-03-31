@@ -16,5 +16,12 @@ DEVDEBUG = True
 async def translate(
     request: TranslateTextRequestSchema
 ):
-    response = shell_translate("trying", "models/onmt_v1/en_kin_model_step_20000.pt")
+    src, trg, text = request.src, request.trg, request.text
+    if src=="en" and trg=="kin":
+        response = shell_translate(text, "models/onmt_v1/en_kin_model_step_20000.pt")
+    elif src=="kin" and trg=="en":
+        response = shell_translate(text, "models/onmt_v1/kin_en_model_step_20000.pt")
+    else:
+        response = ""
+    
     return TranslateTextResponseSchema(translation=response)
