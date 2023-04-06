@@ -20,15 +20,15 @@ def split(
     
     for lang in langs:
         # training files
-        with open(train_file+save_format.format('train', lang), 'w') as f:
+        with open(train_file+save_format.format('train', lang), 'w', encoding='utf-8') as f:
             f.write('\n'.join(train[lang].tolist()))
         
         # testing files
-        with open(test_file+save_format.format('test', lang), 'w') as f:
+        with open(test_file+save_format.format('test', lang), 'w', encoding='utf-8') as f:
             f.write('\n'.join(test[lang].tolist()))
         
         # validation files
-        with open(dev_file+save_format.format('dev', lang), 'w') as f:
+        with open(dev_file+save_format.format('dev', lang), 'w', encoding='utf-8') as f:
             f.write('\n'.join(valid[lang].tolist()))
             
 if __name__=='__main__':
