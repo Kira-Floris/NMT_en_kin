@@ -59,6 +59,7 @@ def extract_dictionary(file_path, save_file='en-rw-dictionary-save.csv'):
     combinated_corpus.extend(results)
   
   df = pd.DataFrame(combinated_corpus, columns=['en', 'rw'])
+  df.dropna(inplace=True)
   df.to_csv(save_file_ + save_file, index=False)
   return df
 
