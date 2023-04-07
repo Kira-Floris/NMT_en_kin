@@ -29,7 +29,7 @@ src_seq_length: 150
 
 # Where to save the log file and the output models/checkpoints
 # log_file: NMT_en_kin/data/logs/onmt/en_kin_model_transformer.log
-save_model: NMT_en_kin/models/onmt/en_kin_model_transformer/en_kin_model
+save_model: NMT_en_kin/models/onmt_others/en_kin_model_transformer/en_kin_model
 
 # Stop training if it does not imporve after n validations
 early_stopping: 4
@@ -45,7 +45,7 @@ seed: 3435
 # Default: 100000 - Train the model to max n steps 
 # Increase to 200000 or more for large datasets
 # For fine-tuning, add up the required steps to the original steps
-train_steps: 2000
+train_steps: 20000
 
 # Default: 10000 - Run validation after n steps
 valid_steps: 1000
