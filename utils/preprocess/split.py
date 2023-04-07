@@ -11,7 +11,7 @@ def split(
     valid_size=0.1, 
     test_size=0.1,
     langs = ['en', 'rw'],
-    save_format = '{}.{}'
+    save_format = '{}-{}.txt'
 ):
     df = pd.read_csv(file_path)
     
