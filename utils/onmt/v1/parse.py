@@ -7,7 +7,8 @@ output_temp_path = 'utils/onmt/v1/temp/temp_{}_output.txt'
 
 def translate(
     text: str,
-    model_path: str 
+    model_path: str,
+    onmt_version='v1'
 ):
     """
     implementation steps
@@ -22,12 +23,15 @@ def translate(
     output_file_path = output_temp_path.format(timestamp)
     
     os.system(f'echo {text} > {input_file_path}')
-    os.system(f'onmt_translate -model {model_path} --src {input_file_path} --output {output_file_path} -verbose -replace_unk')
-    
+    if onmt_version=='v1':
+        os.system(f'onmt_translate -model {model_path} --src {input_file_path} --output {output_file_path} -verbose -replace_unk')
+    else:
+        os.system(f'onmt_translate -model {model_path} -src {input_file_path} -output {output_file_path} -gpu 0 -verbose')    
     response = None
     
     with open(output_file_path, 'r') as out:
         response = out.read()
+        print(response)
         out.close()
         
     os.remove(input_file_path)

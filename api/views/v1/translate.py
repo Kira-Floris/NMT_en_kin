@@ -18,9 +18,9 @@ async def translate(
 ):
     src, trg, text = request.src, request.trg, request.text
     if src=="en" and trg=="kin":
-        response = shell_translate(text, "models/onmt_v1/en_kin_model_step_20000.pt")
+        response = shell_translate(text, "models/onmt_other/transformer/en_kin_model_step_12000.pt", onmt_version='v1')
     elif src=="kin" and trg=="en":
-        response = shell_translate(text, "models/onmt_v1/kin_en_model_step_20000.pt")
+        response = shell_translate(text, "models/onmt_v1/kin_en_model_step_20000.pt", onmt_version='v1')
     else:
         response = ""
     
