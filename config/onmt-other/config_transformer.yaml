@@ -45,7 +45,7 @@ seed: 3435
 # Default: 100000 - Train the model to max n steps 
 # Increase to 200000 or more for large datasets
 # For fine-tuning, add up the required steps to the original steps
-train_steps: 2000
+train_steps: 150000
 log_file: data/train.log
 
 # Default: 10000 - Run validation after n steps
