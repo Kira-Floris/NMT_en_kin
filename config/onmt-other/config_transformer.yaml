@@ -46,6 +46,7 @@ seed: 3435
 # Increase to 200000 or more for large datasets
 # For fine-tuning, add up the required steps to the original steps
 train_steps: 2000
+log_file: data/train.log
 
 # Default: 10000 - Run validation after n steps
 valid_steps: 1000
