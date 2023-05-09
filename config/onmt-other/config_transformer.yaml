@@ -63,7 +63,7 @@ gpu_ranks: [0]
 bucket_size: 262144
 num_workers: 0  # Default: 2, set to 0 when RAM out of memory
 batch_type: "tokens"
-batch_size: 4096   # Tokens per batch, change when CUDA out of memory
+batch_size: 8192   # Tokens per batch, change when CUDA out of memory
 valid_batch_size: 2048
 max_generator_batches: 2
 accum_count: [4]
@@ -72,7 +72,7 @@ accum_steps: [0]
 # Optimization
 model_dtype: "fp16"
 optim: "adam"
-learning_rate: 2
+learning_rate: 0.5 # from 2
 # warmup_steps: 8000
 decay_method: "noam"
 adam_beta2: 0.998
@@ -86,10 +86,10 @@ normalization: "tokens"
 encoder_type: transformer
 decoder_type: transformer
 position_encoding: true
-enc_layers: 6
-dec_layers: 6
+enc_layers: 8
+dec_layers: 8
 heads: 8
-hidden_size: 512
+hidden_size: 1024
 word_vec_size: 512
 transformer_ff: 2048
 dropout_steps: [0]
