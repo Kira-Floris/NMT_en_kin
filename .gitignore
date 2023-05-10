@@ -1,2 +1,9 @@
 models/
 *.pt
+
+temp/
+__pycache__
+
+*.csv
+counter.json
+files/

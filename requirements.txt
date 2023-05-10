@@ -1,2 +1,10 @@
 sacrebleu
-OpenNMT-py
+OpenNMT-py==3.1.1
+fastapi
+uvicorn
+streamlit
+pandas
+seaborn
+matplotlib
+PyMuPDF
+scikit-learn
