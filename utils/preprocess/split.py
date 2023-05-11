@@ -6,17 +6,16 @@ test_file = 'data/test/'
 dev_file = 'data/dev/'
 
 def split(
-    file_path="data/files/clean/data.csv", 
-    train_size=0.8, 
-    valid_size=0.1, 
-    test_size=0.1,
+    file_path="data/files/clean/data-substituted.csv",  
+    valid_size=4999, 
+    test_size=4999,
     langs = ['en', 'rw'],
     save_format = '{}-{}.txt'
 ):
     df = pd.read_csv(file_path)
     
-    train, test_valid = train_test_split(df, test_size=1-train_size, random_state=42)
-    test, valid = train_test_split(test_valid, test_size=valid_size/(valid_size+test_size))
+    train, test_valid = train_test_split(df, test_size=test_size+valid_size, random_state=42)
+    test, valid = train_test_split(test_valid, test_size=valid_size)
     
     for lang in langs:
         # training files

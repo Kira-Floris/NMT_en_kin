@@ -27,7 +27,8 @@ with open(rw_train_data, 'r', encoding='utf-8') as f:
 dictionary_df = pd.read_csv(dictionary_file)
 dictionary_df.dropna(inplace=True)
 
-data_df = pd.DataFrame({'en':en_list, 'rw':rw_list})
+# data_df = pd.DataFrame({'en':en_list, 'rw':rw_list})
+data_df = pd.read_csv(data_file)
 
 def get_rw_synonyms(word, df=dictionary_df):
   """
@@ -61,7 +62,7 @@ def substitute_rw_words(sentence:str):
     1.2 substitute
   """
   words = str(sentence).split()
-  sentences = []
+  sentences = [sentence]
   for word in words:
     synonyms_rw = get_rw_synonyms(word)
     temp = [] 
@@ -79,25 +80,36 @@ def substitute_en_words(sentence:str):
     1.1 get all en synonyms
     1.2 substitute
   """
-  words = str(sentence).split()
-  sentences = []
-  tokens = nltk.word_tokenize(sentence)
+  words = str(sentence).split(" ")
+  sentences = [sentence]
+  tokens = nltk.word_tokenize(sentence, preserve_line=True)
   tagged_tokens = nltk.pos_tag(tokens)
 
-  for token, tag in tagged_tokens:
+  for i, (token, tag) in enumerate(tagged_tokens):
+    # print(token)
+    # try:
+    #   if token in words and tagged_tokens[i+1][0]=="n't": 
+    #     # print(token, tagged_tokens[i+1][0])
+    #     continue
+    #   elif token not in words:
+    #     continue
+    #   else: pass
+    # except:
+    #   continue
     if tag.startswith("V") or tag.startswith("N") or tag.startswith("J"):
       synonyms_en = get_en_synonyms(token)
       temp = []
       for syn in synonyms_en:
-        temp.append(re.sub(token, str(syn), sentence))
+        temp.append(re.sub(r"\b"+token+"\b", str(syn), sentence))
       sentences.extend(temp)
+        
   # if len(sentences)>random_k:
     # return random.sample(sentences, k=random_k)
   return sentences
 
 def substitute_parallel(row):
-  en_subs = substitute_en_words(row[0])
-  rw_subs = substitute_rw_words(row[1])
+  en_subs = substitute_en_words(row["en"])
+  rw_subs = substitute_rw_words(row["rw"])
   combinations = list(set(itertools.product(en_subs, rw_subs)))
   return combinations
 
@@ -106,7 +118,7 @@ if __name__ == '__main__':
     
     print('Starting substituting dataset')
     for index, row in data_df[:].iterrows():
-        corpus.extend(substitute_parallel((row["en"], row["rw"])))
+        corpus.extend(substitute_parallel(row.astype(str)))
         
         if index%2000==0:
             print(f'\t{index} rows finished substituted')
@@ -116,8 +128,10 @@ if __name__ == '__main__':
     df = pd.DataFrame(corpus, columns=columns)
     df.drop_duplicates(inplace=True)
     
-    with open(en_train_data, 'w', encoding='utf8') as f:
-      f.write("\n".join(df["en"].astype("str").tolist()))
+    df.to_csv(save_file, index=False)
     
-    with open(rw_train_data, 'w', encoding='utf8') as f:
-      f.write("\n".join(df["rw"].astype("str").tolist()))
+    # with open(en_train_data, 'w', encoding='utf8') as f:
+      # f.write("\n".join(df["en"].astype("str").tolist()))
+    
+    # with open(rw_train_data, 'w', encoding='utf8') as f:
+      # f.write("\n".join(df["rw"].astype("str").tolist()))
