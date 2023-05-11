@@ -86,7 +86,6 @@ def substitute_en_words(sentence:str):
   tagged_tokens = nltk.pos_tag(tokens)
 
   for i, (token, tag) in enumerate(tagged_tokens):
-    # print(token)
     # try:
     #   if token in words and tagged_tokens[i+1][0]=="n't": 
     #     # print(token, tagged_tokens[i+1][0])
@@ -100,7 +99,8 @@ def substitute_en_words(sentence:str):
       synonyms_en = get_en_synonyms(token)
       temp = []
       for syn in synonyms_en:
-        temp.append(re.sub(r"\b"+token+"\b", str(syn), sentence))
+        t = r"\b"+token+r"\b"
+        temp.append(re.sub(t, str(syn), sentence))
       sentences.extend(temp)
         
   # if len(sentences)>random_k:
