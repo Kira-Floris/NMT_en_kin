@@ -6,7 +6,7 @@ test_file = 'data/test/'
 dev_file = 'data/dev/'
 
 def split(
-    file_path="data/files/clean/data-substituted.csv", 
+    file_path="data/files/clean/data.csv", 
     train_size=0.8, 
     valid_size=0.1, 
     test_size=0.1,
@@ -21,15 +21,15 @@ def split(
     for lang in langs:
         # training files
         with open(train_file+save_format.format('train', lang), 'w', encoding='utf-8') as f:
-            f.write('\n'.join(train[lang].tolist()))
+            f.write('\n'.join(train[lang].astype(str).tolist()))
         
         # testing files
         with open(test_file+save_format.format('test', lang), 'w', encoding='utf-8') as f:
-            f.write('\n'.join(test[lang].tolist()))
+            f.write('\n'.join(test[lang].astype(str).tolist()))
         
         # validation files
         with open(dev_file+save_format.format('dev', lang), 'w', encoding='utf-8') as f:
-            f.write('\n'.join(valid[lang].tolist()))
+            f.write('\n'.join(valid[lang].astype(str).tolist()))
             
 if __name__=='__main__':
     split()

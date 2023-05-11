@@ -7,77 +7,92 @@ import pandas as pd
 import numpy as np
 import re
 import itertools
+import random
+import nltk
+
 
 data_file = 'data/files/clean/data.csv'
-dictionary_file = 'data/files/clean/en-rw-dictionary-save.csv'
+dictionary_file = 'data/files/clean/en-rw-dictionary.csv'
 save_file = 'data/files/clean/data-substituted.csv'
 columns = ['en','rw']
+en_train_data = 'data/train/train-en.txt'
+rw_train_data = 'data/train/train-rw.txt'
+
+with open(en_train_data, 'r', encoding='utf-8') as f:
+  en_list = [line.strip() for line in f.readlines()]
+  
+with open(rw_train_data, 'r', encoding='utf-8') as f:
+  rw_list = [line.strip() for line in f.readlines()]
 
 dictionary_df = pd.read_csv(dictionary_file)
 dictionary_df.dropna(inplace=True)
 
-data_df = pd.read_csv(data_file, encoding='utf-8')
+data_df = pd.DataFrame({'en':en_list, 'rw':rw_list})
 
-def get_rw_synonyms(word, df=dictionary_df, src='en', tgt='rw'):
+def get_rw_synonyms(word, df=dictionary_df):
   """
   gets synonyms to replace in kinyarwanda column
   """
-  synonyms_word_filter = df[df[src]==word]
-  synonyms = list(set(list(synonyms_word_filter[tgt])))
-  # synonyms = synonyms.append(word)
+  synonyms_word_filter = df[df["rw"]==word]
+  synonyms = []
+  if len(synonyms_word_filter)>0:
+    synonyms = list(set(synonyms_word_filter["rw_synonyms"].values[0].split(", ")))
+  
   return synonyms
 
-def get_en_synonyms(word, df=dictionary_df, src='rw', tgt='en'):
+def get_en_synonyms(word, df=dictionary_df):
   """
   get synonyms to replace in english column
   """
-  synonyms_word_filter = df[df[src]==word]
-  synonyms = list(set(list(synonyms_word_filter[tgt])))
-  # synonyms = synonyms.append(word)
+  synonyms_word_filter = df[df["en"]==word]
+  synonyms = []
+  if len(synonyms_word_filter)>0:
+    synonyms = list(set(synonyms_word_filter["en_synonyms"].values[0].split(", ")))
+  
   return synonyms
+  
 
 def substitute_rw_words(sentence:str):
   """
   get new sentences for each synonym
   steps:
     1. loop in all words
-    1.1 get all en words matching rw word in dictionary using get_en_synonyms
-    1.2 get the en translations in rw
-    1.3 substitute
+    1.1 get all rw synonyms
+    1.2 substitute
   """
   words = str(sentence).split()
   sentences = []
   for word in words:
-    synonyms_en = get_en_synonyms(word)
-    synonyms_rw = [get_rw_synonyms(item) for item in synonyms_en]
-    synonyms_rw = list(set(sum(synonyms_rw, [])))
-    temp = []
+    synonyms_rw = get_rw_synonyms(word)
+    temp = [] 
     for syn in synonyms_rw:
       if syn!=None:
         temp.append(re.sub(word, str(syn), sentence))
     sentences.extend(temp)
   return sentences
 
-def substitute_en_words(sentence:str):
+def substitute_en_words(sentence:str, random_k=10):
   """
   get new sentences for each synonym
   steps:
     1. loop in all words
-    1.1 get all rw words matching en word in dictionary using get_en_synonyms
-    1.2 get the rw translations in en
-    1.3 substitute
+    1.1 get all en synonyms
+    1.2 substitute
   """
   words = str(sentence).split()
   sentences = []
-  for word in words:
-    synonyms_rw = get_rw_synonyms(word)
-    synonyms_en = [get_en_synonyms(item) for item in synonyms_rw]
-    synonyms_en = list(set(sum(synonyms_en, [])))
-    temp = []
-    for syn in synonyms_en:
-      if syn!=None:
-        temp.append(re.sub(word, str(syn), sentence))
-    sentences.extend(temp)
+  tokens = nltk.word_tokenize(sentence)
+  tagged_tokens = nltk.pos_tag(tokens)
+
+  for token, tag in tagged_tokens:
+    if tag.startswith("V") or tag.startswith("N") or tag.startswith("J"):
+      synonyms_en = get_en_synonyms(token)
+      temp = []
+      for syn in synonyms_en:
+        temp.append(re.sub(token, str(syn), sentence))
+      sentences.extend(temp)
+  if len(sentences)>random_k:
+    return random.sample(sentences, k=random_k)
   return sentences
 
 def substitute_parallel(row):
@@ -87,17 +102,22 @@ def substitute_parallel(row):
   return combinations
 
 if __name__ == '__main__':
-    
     corpus = []
     
     print('Starting substituting dataset')
-    for index, row in data_df.iterrows():
-        corpus.extend(substitute_parallel((row[1], row[0])))
+    for index, row in data_df[:].iterrows():
+        corpus.extend(substitute_parallel((row["en"], row["rw"])))
         
         if index%2000==0:
-            print(f'\t{index} rows finished substituting')
+            print(f'\t{index} rows finished substituted')
     
     print('Finished substituting.\n')
     
     df = pd.DataFrame(corpus, columns=columns)
-    df.to_csv(save_file, index=False)
+    df.drop_duplicates(inplace=True)
+    
+    with open(en_train_data, 'w', encoding='utf8') as f:
+      f.write("\n".join(df["en"].astype("str").tolist()))
+    
+    with open(rw_train_data, 'w', encoding='utf8') as f:
+      f.write("\n".join(df["rw"].astype("str").tolist()))

@@ -3,65 +3,142 @@ import re
 import numpy as np
 import pandas as pd
 import itertools
+import nltk
+from nltk.corpus import wordnet
+from nltk.tokenize import word_tokenize
 
 pdf_file = 'data/files/unclean/english-kinyarwanda dictionary.pdf'
-save_file_ = 'data/files/clean/'
+save_file = 'data/files/clean/en-rw-dictionary.csv'
 corpus_pattern = "(.*)\s-\s(.*)"
 corpus_split_text = "this book will be of some use to those beginning their study of Kinyarwanda."
+en_pattern = r'\s\([^)]*\)'
+rw_pattern = r'\s\([^)]*\)'
+brackets_pattern = r"\([^\)]+\)"
+hyphen_pattern = r'\s-\w+(?:,)?\s*'
+semicolon_pattern = r';\s*'
 
-def open_file(file_path):
-  with fitz.open(file_path) as doc:
-    text = ''
-    for page in doc:
-      text += page.get_text()
-  return text
+class EnKinExtractor:
+  def __init__(
+      self, 
+      file_path:str=pdf_file,
+      save_file:str=save_file,
+      corpus_pattern:str=corpus_pattern,
+      corpus_start_text:str=corpus_split_text,
+      en_pattern:str=en_pattern,
+      rw_pattern:str=rw_pattern,
+      ):
+    self.file_path = file_path
+    self.save_file = save_file
+    self.corpus_pattern = corpus_pattern
+    self.corpus_start_text = corpus_start_text
+    self.en_pattern = en_pattern
+    self.rw_pattern = rw_pattern
+    self.corpus_list = []
 
-def process_english(text):
-  text = re.sub(r'\s\([^)]*\)', '', text)
-  return (text.split(',')[0],)
+    self.__extract_dictionary()
+    self.__save_dictionary()
 
-def process_kinyarwanda(text):
-  text = re.sub(r'\s\([^)]*\)', '', text)
-  return tuple(text.split(','))
-
-def combinations(en, rw):
-  results = list(
-      itertools.product(
-          list(en),
-          list(rw)
-          )
-      )
-  return results
-
-def extract_dictionary(file_path, save_file='en-rw-dictionary-save.csv'):
-  """
-  steps:
-    1. load file
-    2. remove pre corpus data; split at 'ENGLISH-KINYARWANDA'; original 3500 words
-    3. collect parallel corpus from dictionary using regex
-    4. make combinations for english and kinyarwanda; 4500 combinations
-    5. save into a csv file
-  """
-  dictionary_text = open_file(file_path)
-  dictionary_text = dictionary_text.split(corpus_split_text)[1]
-  dictionary_corpus_text = re.findall(corpus_pattern, dictionary_text)
-
-  combinated_corpus = []
-
-  for i in range(len(dictionary_corpus_text)):
-    item = list(dictionary_corpus_text[i])
-    if item[0][0] == '(':
-      item[0] = dictionary_corpus_text[i-1][0]
-    results = combinations(
-        process_english(item[0]),
-        process_kinyarwanda(item[1])
-    )
-    combinated_corpus.extend(results)
+  def __open_file(self):
+    with fitz.open(self.file_path) as doc:
+      text = ''
+      for page in doc:
+        text += page.get_text()
+    self.doc = text
+    return self.doc
   
-  df = pd.DataFrame(combinated_corpus, columns=['en', 'rw'])
-  df.dropna(inplace=True)
-  df.to_csv(save_file_ + save_file, index=False)
-  return df
+  def __get_corpus(self):
+    corpus = self.doc.split(self.corpus_start_text)[1]
+    self.corpus_doc = re.findall(self.corpus_pattern, corpus)
+    return self.corpus_doc
+
+  def __process_english(self, text):
+    text = re.sub(self.en_pattern, '', text)
+    text = self.__process_text(text).split(',')[0]
+    return text if text!='' else None
+
+  def __process_kinyarwanda(self, text):
+    text = re.sub(self.rw_pattern, '', text)
+    text = self.__process_text(text)
+    return text if text!='' else None
+
+  def __process_text(self, text):
+    # remove words in brackets
+    text = re.sub(brackets_pattern, '', text)
+    text = text.split('(')[0]
+
+    # replace ; with ,
+    text = re.sub(semicolon_pattern, ',', text)
+
+    # remove words that starts with -
+    text = re.sub(hyphen_pattern, '', text)
+
+    # remove e.g. 
+    def has_eg(sentence):
+      pattern = r'e\.g\.'
+      return bool(re.search(pattern, sentence))
+    
+    text = text if has_eg(text)!=True else ''
+    return text
+
+  def __extract_rw_synomyms(self, text):
+    if len(text.split(','))>0:
+      temp = text.split(',')
+      return [temp[0], ', '.join(temp[1:])]
+    else:
+      return list(text, None)
+
+  def __extract_en_synonyms(self, text):
+    synonyms = []
+    for syn in wordnet.synsets(text):
+      for lemma in syn.lemmas():
+          synonyms.append(lemma.name())
+    synonyms = list(set(synonyms))
+    if text in synonyms:
+      synonyms.remove(text)
+    if len(synonyms)>0:
+      temp = re.sub('_',' ',', '.join(map(str, synonyms)).lower())
+      return [text, temp]
+    else:
+      return [text, None]
+
+  def __generate_word_type(self, en, rw):
+    checknoun = wordnet.synsets(en, pos=wordnet.NOUN)
+    checkverb = wordnet.synsets(en, pos=wordnet.VERB)
+    checkadj = wordnet.synsets(en, pos=wordnet.ADJ)
+    if checknoun and checkverb:
+      if(rw[0] in ['a','e','i','o','u']):
+        return "NOUN"
+      else:
+        return "VERB"
+    if checknoun:
+      return "NOUN"
+    if checkverb:
+      return "VERB"
+    if checkadj:
+      return "ADJ"
+    return None
+
+  def __extract_dictionary(self):
+    self.__open_file()
+    self.__get_corpus()
+    for i in range(len(self.corpus_doc)):
+      item = self.corpus_doc[i]
+      en_text = self.__process_english(item[0])
+      rw_text = self.__process_kinyarwanda(item[1])
+      if en_text and rw_text and len(re.findall('-', en_text+rw_text))==0:
+        temp = []
+        rw_synonyms = self.__extract_rw_synomyms(rw_text.lower())
+        en_synonyms = self.__extract_en_synonyms(en_text.lower())
+        temp.extend(en_synonyms)
+        temp.extend(rw_synonyms)
+        self.corpus_list.append(temp) 
+    return self.corpus_list
+
+  def __save_dictionary(self):
+    self.df = pd.DataFrame(self.corpus_list, columns=['en', 'en_synonyms', 'rw', 'rw_synonyms'])
+    # self.df["word_type"] = self.df.apply(lambda x: self.__generate_word_type(x["en"], x["rw"]), axis=1)
+    self.df.to_csv(self.save_file, index=False)
+    return self.df
 
 if __name__ == '__main__':
-    extract_dictionary(pdf_file)
+    obj = EnKinExtractor()
