@@ -71,7 +71,7 @@ def substitute_rw_words(sentence:str):
     sentences.extend(temp)
   return sentences
 
-def substitute_en_words(sentence:str, random_k=10):
+def substitute_en_words(sentence:str):
   """
   get new sentences for each synonym
   steps:
@@ -91,8 +91,8 @@ def substitute_en_words(sentence:str, random_k=10):
       for syn in synonyms_en:
         temp.append(re.sub(token, str(syn), sentence))
       sentences.extend(temp)
-  if len(sentences)>random_k:
-    return random.sample(sentences, k=random_k)
+  # if len(sentences)>random_k:
+    # return random.sample(sentences, k=random_k)
   return sentences
 
 def substitute_parallel(row):
