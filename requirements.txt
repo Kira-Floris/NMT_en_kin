@@ -1,11 +1,3 @@
-sacrebleu
-OpenNMT-py==3.1.1
-fastapi
-uvicorn
-streamlit
-pandas
-seaborn
-matplotlib
-PyMuPDF
-scikit-learn
-nltk
+version https://git-lfs.github.com/spec/v1
+oid sha256:0edc5f61fe0797e082ad9c4288aa62ad57b94f8ed9883125fa60622347878722
+size 105
