@@ -29,7 +29,7 @@ src_seq_length: 150
 
 # Where to save the log file and the output models/checkpoints
 # log_file: NMT_en_kin/data/logs/onmt/en_kin_model_transformer.log
-save_model: NMT_en_kin/models/onmt_others/en_kin_model_transformer/en_kin_model
+save_model: NMT_en_kin/models/onmt_others/kin_en_model_transformer/kin_en_model
 
 # Stop training if it does not imporve after n validations
 early_stopping: 4
