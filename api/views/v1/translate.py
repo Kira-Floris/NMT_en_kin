@@ -12,6 +12,9 @@ translate_v1 = APIRouter(prefix="/api/v1/translate")
 
 DEVDEBUG = True
 
+en_rw_model = "models/onmt_other/transformer/en_kin_model_step_12000.pt"
+rw_en_model = "models/onmt_other/transformer/rw_en_model_step_5000.pt"
+
 @translate_v1.post("")
 async def translate(
     request: TranslateTextRequestSchema

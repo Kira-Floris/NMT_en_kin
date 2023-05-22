@@ -6,6 +6,7 @@ import itertools
 import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
+from nltk.corpus import gutenberg
 
 pdf_file = 'data/files/unclean/english-kinyarwanda dictionary.pdf'
 save_file = 'data/files/clean/en-rw-dictionary.csv'
@@ -34,6 +35,11 @@ class EnKinExtractor:
     self.en_pattern = en_pattern
     self.rw_pattern = rw_pattern
     self.corpus_list = []
+
+    # loading gutenberg
+    nltk.corpus.gutenberg.ensure_loaded()
+    self.gutenberg_words = gutenberg.words()
+    self.gutenberg_freq_dist = nltk.FreqDist(self.gutenberg_words)
 
     self.__extract_dictionary()
     self.__save_dictionary()
@@ -83,20 +89,38 @@ class EnKinExtractor:
   def __extract_rw_synomyms(self, text):
     if len(text.split(','))>0:
       temp = text.split(',')
-      return [temp[0], ', '.join(temp[1:])]
+      return [temp[0], ','.join(temp[1:])]
     else:
       return list(text, None)
 
-  def __extract_en_synonyms(self, text):
+  def __get_word_frequency(self, word):
+    frequency = self.gutenberg_freq_dist[word]
+    return frequency
+
+  def __extract_en_synonyms(self, text, remove_unsimilar=True, remove_single_letter=True):
     synonyms = []
     for syn in wordnet.synsets(text):
       for lemma in syn.lemmas():
           synonyms.append(lemma.name())
     synonyms = list(set(synonyms))
-    if text in synonyms:
-      synonyms.remove(text)
-    if len(synonyms)>0:
-      temp = re.sub('_',' ',', '.join(map(str, synonyms)).lower())
+
+    text_frequency = self.__get_word_frequency(text)
+    synonyms_ = []
+
+    # remove words that does not a frequency of text_frequency -150 or above
+    # remove words with less than 2 words, eg: I, u, he, me
+    if remove_unsimilar and len(text)>2:
+      for word in synonyms:
+        if text=="lime":
+          print(word.split())
+        if self.__get_word_frequency(word) >= (text_frequency-150) and len(word.split("_"))==1:
+          synonyms_.append(word)
+    
+
+    if text in synonyms_:
+      synonyms_.remove(text)
+    if len(synonyms_)>0:
+      temp = re.sub('_',' ',', '.join(map(str, synonyms_)).lower())
       return [text, temp]
     else:
       return [text, None]
